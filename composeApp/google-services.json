@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "452779216958",
+    "project_id": "kmprecipeapp",
+    "storage_bucket": "kmprecipeapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452779216958:android:f10f4afe653cb35f9d016f",
+        "android_client_info": {
+          "package_name": "com.vk.kmprecipeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHVAIrgSMGPW5dad75XLuZyuqiHvh6YAk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
