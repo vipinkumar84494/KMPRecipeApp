@@ -6,6 +6,7 @@ import com.vk.kmprecipeapp.data.ItemRepository
 import com.vk.kmprecipeapp.data.ItemRepositoryImpl
 import com.vk.kmprecipeapp.data.SettingsRepository
 import com.vk.kmprecipeapp.network.ApiClient
+import com.vk.kmprecipeapp.viewModel.SettingsViewModel
 import io.ktor.client.HttpClient
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -22,6 +23,7 @@ fun initKoin(
         single<ItemRepository> { ItemRepositoryImpl(get()) }
         single<Settings> {  settings }
         single { SettingsRepository(get()) }
+        single { SettingsViewModel() }
         factory { ItemsViewModel(get()) }
     }
     startKoin { modules(appModule) }

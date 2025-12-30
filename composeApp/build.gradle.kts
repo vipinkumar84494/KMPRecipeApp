@@ -77,6 +77,8 @@ kotlin {
 
             implementation("network.chaintech:cmp-image-pick-n-crop:1.1.2")
 
+            implementation(compose.materialIconsExtended)
+
         }
 
         iosMain.dependencies {

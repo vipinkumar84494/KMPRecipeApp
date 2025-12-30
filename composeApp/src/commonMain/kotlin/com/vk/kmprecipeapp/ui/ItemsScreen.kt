@@ -24,10 +24,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.vk.kmprecipeapp.model.Recipe
 import com.vk.kmprecipeapp.utils.Cons
 import com.vk.kmprecipeapp.utils.Cons.Companion.SELECTED_CATEGORY
@@ -63,263 +68,126 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ItemsScreen(
+@Composable
+fun ItemsScreen(
     viewModel: ItemsViewModel,
     navController: NavController
-    ) {
-        val state by viewModel.state.collectAsStateWithLifecycle()
-        val stateRecipes by viewModel.stateRecipes.collectAsStateWithLifecycle()
-        val settings = remember { SettingsViewModel() }
+) {
+    val stateRecipes by viewModel.stateRecipes.collectAsStateWithLifecycle()
+    val settings = remember { SettingsViewModel() }
 
 
-    var category = "Categorie"
-    if (!settings.repo.getValue(SELECTED_CATEGORY).isEmpty()){
+    var category = "Categories"
+    if (!settings.repo.getValue(SELECTED_CATEGORY).isEmpty()) {
         category = "Recently viewed: ${settings.repo.getValue(SELECTED_CATEGORY)}"
     }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    var showLogoutDialog by remember { mutableStateOf(false) }
 
     val userdata = settings.repo.getUserData(Cons.USER_DATA)
 
-    val profilePic = settings.repo.getValue(Cons.PROFILE_PIC)
-
-    println("User data  "+userdata)
+    println("User data  " + userdata)
 
 
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
 //            viewModel.loadItems()
-            viewModel.getRecipesData()
-        }
+        viewModel.getRecipesData()
+    }
 
-    LogOutDialog(
-        show = showLogoutDialog,
-        onConfirm = {
-            navController.navigate("login") {
-                settings.repo.clear()
-                popUpTo("home") { inclusive = true }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+        ) {
 
-            }
-        },
-        onDismiss = {
-            showLogoutDialog = false
-        }
-    )
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet() {
 
-                Box(modifier = Modifier.fillMaxWidth()
-                    .height(100.dp)
-                    .background(
-                        color = Color.LightGray
-                    ),
-                    ){
-
-                    Row(
-                        modifier = Modifier.align(Alignment.CenterStart),
-                    ){
-//                        Image(
-//                            painter = painterResource(Res.drawable.account),
-//                            contentDescription = null,
-//                            modifier = Modifier
-//                                .padding(10.dp)
-//                                .size(100.dp)
-//
-//                        )
-                        KamelImage(
-                            resource = asyncPainterResource(profilePic),
-                            contentDescription = "Profile",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(10.dp)
-                                .size(80.dp)
-                                .clip(CircleShape)
-
-                        )
-                        Text(text = userdata?.firstName!!.trim()+" "+userdata.lastName!!.trim(),
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(10.dp)
-                                .align(Alignment.CenterVertically)
-
-                        )
-                    }
+            when {
+                stateRecipes.isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
-
-                NavigationDrawerItem(
-                    label = { Text("Home") },
-                    selected = false,
-                    modifier = Modifier.padding(start = 16.dp),
-                    onClick = {
-                        scope.launch { drawerState.close() }
-
-                    }
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("Profile") },
-                    selected = false,
-                    modifier = Modifier.padding(start = 16.dp),
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("profile")
-                    }
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("Logout") },
-                    selected = false,
-                    modifier = Modifier.padding(start = 16.dp),
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        showLogoutDialog = true
-                    }
-                )
-            }
-        }
-    )
-
-    {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {  },
-                        navigationIcon = {
-                            IconButton(
-                                onClick = {
-                                    scope.launch { drawerState.open() }
-                                }
-                            ) {
-                                Image(
-                                    painter = painterResource(Res.drawable.menu),
-                                    contentDescription = "Menu",
-                                    modifier = Modifier
-                                        .padding(start = 16.dp)
-                                )
-                            }
-                        },
-                        actions = {
-                            IconButton(
-                                onClick = {
-                                    navController.navigate("profile")
-
-                                }
-                            ) {
-                                KamelImage(
-                                    resource = asyncPainterResource(profilePic),
-                                    contentDescription = "Profile",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .wrapContentWidth()
-
-                                )
-                            }
-
-
-                        }
+                stateRecipes.error != null -> {
+                    Text(
+                        text = "Error: ${stateRecipes.error}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
                     )
-                },
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(start = 16.dp,end = 16.dp, bottom = 16.dp)
-                ) {
+                    println(stateRecipes.error)
+                }
 
+                else -> {
+                    println(stateRecipes)
+                    Column {
+//                        Text(
+//                            modifier = Modifier.padding(bottom = 16.dp)
+//                                .align(Alignment.Start),
+//                            style = MaterialTheme.typography.titleLarge.copy(
+//                                fontSize = 20.sp
+//                            ),
+//                            text = category,
+//                        )
 
-                    when {
-                        stateRecipes.isLoading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                        }
-
-                        stateRecipes.error != null -> {
-                            Text(
-                                text = "Error: ${stateRecipes.error}",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                            println(stateRecipes.error)
-                        }
-
-                        else -> {
-                            println(stateRecipes)
-                            Column {
-                                Text(
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                        .align(Alignment.Start),
-                                    style = MaterialTheme.typography.titleLarge.copy(
-                                        fontSize = 20.sp
-                                    ),
-                                    text = category,
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(stateRecipes.recipesData.recipes.size) { item ->
+                                ItemRow(
+                                    stateRecipes.recipesData.recipes.get(item),
+                                    navController,
+                                    viewModel
                                 )
-
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(stateRecipes.recipesData.recipes.size) { item ->
-                                        ItemRow(stateRecipes.recipesData.recipes.get(item), navController, viewModel)
-                                    }
-                                }
                             }
-
                         }
                     }
+
                 }
             }
         }
     }
 
-    @Composable
-    private fun ItemRow(item: Recipe, navController: NavController, viewModel: ItemsViewModel) {
+@Composable
+fun ItemRow(item: Recipe, navController: NavController, viewModel: ItemsViewModel) {
 
-        Column {
-            Card(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight()
-                    .background(Color.White)
-                    .clickable(
-                        onClick = {
-                            viewModel.selectCategory(item)
-                            navController.navigate("item/${item.name}")
-                        }
-                    )
-                ,
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+    Column {
+        Card(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .background(Color.White)
+                .clickable(
+                    onClick = {
+                        viewModel.selectCategory(item)
+                        navController.navigate("item/${item.name}")
+                    }
+                ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        ) {
+
+
+            Column(
             ) {
 
-
-                Column(
-                ) {
-
-                    KamelImage(
-                        resource = asyncPainterResource(item.image),
-                        contentDescription = item.name,
-                        modifier = Modifier
-                            .wrapContentWidth()
-                    )
-                }
+                KamelImage(
+                    resource = asyncPainterResource(item.image),
+                    contentDescription = item.name,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                )
             }
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding( 16.dp)
-
-            )
         }
+        Text(
+            text = item.name,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .wrapContentWidth()
+                .align(Alignment.CenterHorizontally)
+                .padding(16.dp)
 
+        )
     }
+
+}
 
 
 

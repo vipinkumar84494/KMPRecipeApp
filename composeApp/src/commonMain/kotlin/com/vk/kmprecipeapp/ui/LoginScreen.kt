@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import com.vk.kmprecipeapp.utils.Cons
 import com.vk.kmprecipeapp.viewModel.ItemsViewModel
 import com.vk.kmprecipeapp.viewModel.SettingsViewModel
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 
 @Composable
@@ -43,7 +45,7 @@ fun LoginScreen(navController: NavController,viewModel: ItemsViewModel) {
     var password by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     val couroutineScope = rememberCoroutineScope()
-    val settings = remember { SettingsViewModel() }
+    val settingsViewModel: SettingsViewModel = koinInject()
 
     var isState by remember { mutableStateOf(false) }
 
@@ -76,9 +78,11 @@ fun LoginScreen(navController: NavController,viewModel: ItemsViewModel) {
                         }
                         state.loginResponse != null  && state.error == null -> {
                             isState = false
-                            settings.repo.saveAccessToken(accessToken = state.loginResponse!!.accessToken!!)
-                            settings.repo.saveUserData(Cons.USER_DATA,state.loginResponse!!)
-                            settings.repo.saveValue(Cons.PROFILE_PIC,"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGyogBYaoFIZhcm9Ei2LB4Vb3gczmCpLod4Q&s")
+                            settingsViewModel.repo.saveAccessToken(accessToken = state.loginResponse!!.accessToken!!)
+                            settingsViewModel.updateUserData(state.loginResponse!!)
+                            settingsViewModel.updateProfilePic("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGyogBYaoFIZhcm9Ei2LB4Vb3gczmCpLod4Q&s")
+//                            settings.repo.saveUserData(Cons.USER_DATA,state.loginResponse!!)
+//                            settings.repo.saveValue(Cons.PROFILE_PIC,"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGyogBYaoFIZhcm9Ei2LB4Vb3gczmCpLod4Q&s")
                             navController.navigate("home"){
                                 popUpTo("login"){
                                     inclusive = true

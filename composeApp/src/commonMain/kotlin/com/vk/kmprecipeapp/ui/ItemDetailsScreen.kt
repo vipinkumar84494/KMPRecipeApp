@@ -48,7 +48,6 @@ fun ItemDetailsScreen(viewModel: ItemsViewModel, navController: NavController) {
 
     Column(
         modifier = Modifier
-            .padding(WindowInsets.safeDrawing.asPaddingValues())
             .verticalScroll(
                 scrollState
             ),
@@ -62,7 +61,7 @@ fun ItemDetailsScreen(viewModel: ItemsViewModel, navController: NavController) {
                 painter = painterResource(Res.drawable.left_arrow),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(start = 16.dp)
                     .size(24.dp)
                     .clickable {
                         navController.navigateUp()

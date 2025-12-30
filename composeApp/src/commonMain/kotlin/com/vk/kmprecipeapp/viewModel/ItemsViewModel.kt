@@ -124,6 +124,8 @@ class ItemsViewModel(
     }
 
     private var selectedCategory: Recipe? = null
+    private var selectedCuisine: String? = null
+
 
     fun selectCategory(category: Recipe){
         selectedCategory = category
@@ -131,6 +133,13 @@ class ItemsViewModel(
     }
     fun getSelectedCategory(): Recipe? {
         return selectedCategory
+    }
+
+    fun selectedCuisine(cuisine: String){
+        selectedCuisine = cuisine
+    }
+    fun getSelectedCuisine(): String? {
+        return selectedCuisine
     }
 
 

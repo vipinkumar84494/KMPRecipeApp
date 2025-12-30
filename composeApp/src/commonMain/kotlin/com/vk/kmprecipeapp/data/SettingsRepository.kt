@@ -49,8 +49,6 @@ class SettingsRepository(private val settings: Settings) {
 
     }
 
-
-
     fun clear() {
         settings.clear()
     }
